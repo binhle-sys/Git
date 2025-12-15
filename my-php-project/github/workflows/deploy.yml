@@ -1,0 +1,55 @@
+# Tên của Workflow
+name: Deploy PHP/HTML Project via FTP
+
+# Điều kiện kích hoạt Workflow
+on:
+  # Chạy khi có push vào nhánh 'main'
+  push:
+    branches:
+      - main
+  # Cung cấp một tùy chọn chạy thủ công (tùy chọn)
+  workflow_dispatch:
+
+# Định nghĩa các công việc (jobs)
+jobs:
+  deploy:
+    # Chạy trên môi trường Ubuntu
+    runs-on: ubuntu-latest
+    
+    # Các bước thực hiện
+    steps:
+      # Bước 1: Checkout mã nguồn
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        
+      # Bước 2: Thiết lập PHP (nếu cần chạy unit test hoặc linting)
+      # Bỏ qua nếu dự án HTML/PHP của bạn quá đơn giản và không cần test/build
+      - name: Set up PHP 
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1' # Thay đổi phiên bản PHP nếu cần
+          
+      # (Tùy chọn) Bước 3: Cài đặt dependencies PHP (ví dụ: Composer)
+      # - name: Install Dependencies
+      #   run: composer install --prefer-dist --no-progress
+      
+      # Bước 4: Triển khai (Deploy) qua FTP/SFTP
+      # Sử dụng một Action phổ biến để deploy qua FTP
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.0
+        with:
+          # Thư mục trong repo GitHub để deploy (toàn bộ repo nếu là '.')
+          folder: . 
+          # Sử dụng các Secret đã lưu ở bước II.2
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          # Thư mục đích trên server
+          server-directory: ${{ secrets.FTP_DIRECTORY }}
+          # Bật/Tắt chế độ SFTP (khuyến nghị dùng SFTP (true) thay vì FTP)
+          protocol: sftp # Hoặc ftp
+          # Thêm các file/thư mục cần bỏ qua khi upload (ví dụ: .git, .github)
+          exclude: |
+            **/.git*
+            **/.github*
+            **/vendor/
