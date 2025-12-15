@@ -51,5 +51,5 @@ jobs:
           # Thêm các file/thư mục cần bỏ qua khi upload (ví dụ: .git, .github)
           exclude: |
             **/.git*
-            **/.github*
+            **/github*
             **/vendor/
